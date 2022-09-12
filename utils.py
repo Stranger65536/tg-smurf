@@ -1,7 +1,7 @@
 # coding=utf-8
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Union, Literal
+from typing import Optional, Union, Literal, Dict, Any
 
 from telethon.tl.patched import MessageService
 from telethon.tl.types import Channel, User, Message, Chat
@@ -70,12 +70,26 @@ def parse_chat_name(
         raise ValueError("Unknown chat info! {}".format(chat))
 
 
+def parse_date(date: datetime) -> Dict[str, Any]:
+    return {
+        "date_time": date,
+        "year": date.year,
+        "month": date.month,
+        "day": date.day,
+        "weekday": date.weekday() + 1,
+        "hour": date.hour,
+        "minute": date.minute,
+        "second": date.second,
+        "week": date.isocalendar().week,
+    }
+
+
 @dataclass
 class EsDoc(object):
     message_id: int
     chat_id: int
     chat_name: Optional[str]
-    date: datetime
+    date: Dict[str, Any]
     day_of_week: int
     sender: Union[UserSender, ChannelSender, None]
     reply_to_id: Optional[int]
@@ -104,7 +118,7 @@ def message_to_doc(message: Union[MessageService, Message]) -> EsDoc:
         message_id=message.id,
         chat_id=message.chat_id,
         chat_name=parse_chat_name(message.chat),
-        date=message.date,
+        date=parse_date(message.date),
         day_of_week=message.date.weekday() + 1,
         sender=parse_sender(message.sender),
         reply_to_id=message.reply_to_msg_id,

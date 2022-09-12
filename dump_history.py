@@ -72,7 +72,7 @@ async def main() -> None:
                                                        min_id=min_id)):
             es_doc: EsDoc = message_to_doc(message)
             if pbar is not None:
-                pbar.desc = str(es_doc.date)
+                pbar.desc = str(es_doc.date["date_time"])
             yield {
                 "_index": index_name,
                 "_source": asdict(es_doc),

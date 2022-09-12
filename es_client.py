@@ -25,7 +25,7 @@ async def search_latest_message_id(
     matches = await es.search(body={
         "sort": [
             {
-                "date": {
+                "date.date_time": {
                     "order": "desc",
                     "missing": "_last"
                 },

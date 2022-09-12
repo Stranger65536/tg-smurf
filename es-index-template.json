@@ -27,10 +27,35 @@
           }
         },
         "date": {
-          "type": "date"
-        },
-        "day_of_week": {
-          "type": "int"
+          "properties": {
+            "date_time": {
+              "type": "date"
+            },
+            "year": {
+              "type": "integer"
+            },
+            "month": {
+              "type": "integer"
+            },
+            "day": {
+              "type": "integer"
+            },
+            "weekday": {
+              "type": "integer"
+            },
+            "hour": {
+              "type": "integer"
+            },
+            "minute": {
+              "type": "integer"
+            },
+            "second": {
+              "type": "integer"
+            },
+            "week": {
+              "type": "integer"
+            }
+          }
         },
         "sender": {
           "properties": {
