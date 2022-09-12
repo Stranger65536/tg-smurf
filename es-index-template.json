@@ -1,0 +1,146 @@
+{
+  "index_patterns": [
+    "tg-history-*"
+  ],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "_source": {
+        "enabled": true
+      },
+      "properties": {
+        "message_id": {
+          "type": "long"
+        },
+        "chat_id": {
+          "type": "long"
+        },
+        "chat_name": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "date": {
+          "type": "date"
+        },
+        "day_of_week": {
+          "type": "int"
+        },
+        "sender": {
+          "properties": {
+            "type": {
+              "type": "text"
+            },
+            "id": {
+              "type": "long"
+            },
+            "username": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "first_name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "last_name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "phone": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "channel_name": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "reply_to_id": {
+          "type": "long"
+        },
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "grouped_id": {
+          "type": "long"
+        },
+        "is_service_message": {
+          "type": "boolean"
+        },
+        "has_media": {
+          "type": "boolean"
+        },
+        "has_audio": {
+          "type": "boolean"
+        },
+        "has_contact": {
+          "type": "boolean"
+        },
+        "has_document": {
+          "type": "boolean"
+        },
+        "has_file": {
+          "type": "boolean"
+        },
+        "has_geo": {
+          "type": "boolean"
+        },
+        "has_gif": {
+          "type": "boolean"
+        },
+        "has_photo": {
+          "type": "boolean"
+        },
+        "has_poll": {
+          "type": "boolean"
+        },
+        "has_sticker": {
+          "type": "boolean"
+        },
+        "has_video": {
+          "type": "boolean"
+        },
+        "has_voice": {
+          "type": "boolean"
+        },
+        "has_forward": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "priority": 500,
+  "version": 1
+}
