@@ -43,5 +43,5 @@ async def search_latest_message_id(
         return None
     latest_msg = hits[0]["_source"]
     print("Latest message id: {} time: {}".format(
-        latest_msg["message_id"], latest_msg["date"]))
+        latest_msg["message_id"], latest_msg["date"]["date_time"]))
     return latest_msg["message_id"]
