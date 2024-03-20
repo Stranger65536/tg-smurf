@@ -29,9 +29,9 @@ async def main() -> None:
     )
     parser.add_argument(
         "-c", "--chat-id", type=int,
-        required=True,
+        required=False,
         metavar="chat_id", dest="chat_id",
-        help="Id of chat / group / channel to dump"
+        help="Id of chat / group / channel to dump. All if missing"
     )
     parser.add_argument(
         "-e", "--es-url", type=str,
@@ -52,48 +52,60 @@ async def main() -> None:
     chat_id = args.chat_id
     es_index_prefix = args.es_index_prefix
     es_url = args.es_url
-    target_dialog = [i for i in dialogs if i.id == chat_id]
-    index_name = "{}{}".format(es_index_prefix, chat_id)
+    target_dialogs = [
+        i for i in dialogs if (
+            i.id == chat_id if chat_id else i.is_user
+        )
+    ]
 
-    if not target_dialog:
-        raise ValueError("Chat with id {} not found!".format(chat_id))
-    target_dialog = target_dialog[0]
+    if not target_dialogs:
+        raise ValueError("No chats!")
 
     es: AsyncElasticsearch = es_client(es_url)
     if not await es.ping():
         raise ValueError("Es ping unsuccessful!")
 
-    min_id: Optional[int] = \
-        await search_latest_message_id(es, index_name) or 0
+    for target_dialog in target_dialogs:
+        index_name = "{}{}".format(
+            es_index_prefix, target_dialog.id
+        )
 
-    async def generator():
-        async for message in tqdm(client.iter_messages(target_dialog,
-                                                       reverse=True,
-                                                       min_id=min_id)):
-            es_doc: EsDoc = message_to_doc(message)
-            if pbar is not None:
-                pbar.desc = str(es_doc.date["date_time"])
-            yield {
-                "_index": index_name,
-                "_source": asdict(es_doc),
-            }
+        min_id: Optional[int] = \
+            await search_latest_message_id(es, index_name) or 0
 
-    progress = async_streaming_bulk(
-        es, generator(),
-        chunk_size=500,
-        max_chunk_bytes=104857600,
-        raise_on_error=True,
-        raise_on_exception=True,
-        yield_ok=True,
-    )
+        async def generator():
+            async for message in tqdm(
+                    client.iter_messages(target_dialog,
+                                         reverse=True,
+                                         min_id=min_id),
+                    desc=target_dialog.name or target_dialog.title):
+                es_doc: EsDoc = message_to_doc(message)
+                if pbar is not None:
+                    pbar.desc = str(es_doc.date["date_time"])
+                yield {
+                    "_index": index_name,
+                    "_source": asdict(es_doc),
+                }
 
-    pbar = tqdm(progress)
-    async for ok, item in pbar:
-        if not ok:
-            print("Item index failed: {}".format(item))
+        progress = async_streaming_bulk(
+            es, generator(),
+            chunk_size=500,
+            max_chunk_bytes=104857600,
+            raise_on_error=True,
+            raise_on_exception=True,
+            yield_ok=True,
+        )
 
-    await es.indices.flush(index=index_name)
-    await es.indices.refresh(index=index_name)
+        pbar = tqdm(
+            progress,
+            desc=target_dialog.name or target_dialog.title
+        )
+        async for ok, item in pbar:
+            if not ok:
+                print("Item index failed: {}".format(item))
+
+        await es.indices.flush(index=index_name)
+        await es.indices.refresh(index=index_name)
 
     await client.disconnect()
     await es.close()
